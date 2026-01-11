@@ -1,0 +1,88 @@
+/* style.css */
+
+/* Background Utama */
+body {
+    /* Perhatikan ../../ artinya naik 2 kali: keluar dari 'layout' lalu keluar dari 'dashboard' */
+    background: url('../../img/bg.jpg'); 
+    background-size: cover; 
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Container utama agar terlihat melayang (Glassmorphism) */
+.main-container {
+    background: rgba(255, 255, 255, 0.85); /* Sedikit lebih transparan */
+    backdrop-filter: blur(15px); /* Efek blur lebih kuat */
+    -webkit-backdrop-filter: blur(15px); /* Dukungan Safari */
+    border-radius: 20px;
+    padding: 30px;
+    margin-top: 50px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Styling Tabel agar lebih bersih */
+.table {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: #4e73df;
+    color: white;
+    border: none;
+}
+
+/* Styling Card pada Form Tambah/Edit */
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+    font-weight: 600;
+    border-bottom: none;
+}
+
+/* Alert Notification - dibuat lebih mencolok */
+.alert {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    margin-bottom: 25px;
+}
+
+/* Tombol Custom dengan efek hover yang halus */
+.btn {
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+}
+
+.badge-stock { 
+    min-width: 40px; 
+}
+
+.table-hover tbody tr:hover { 
+    background-color: rgba(0,0,0,.03); 
+}
+
+/* Penyesuaian untuk layar HP */
+@media (max-width: 768px) {
+    .main-container {
+        margin-top: 20px;
+        padding: 15px;
+    }
+}
