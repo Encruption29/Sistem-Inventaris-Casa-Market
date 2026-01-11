@@ -9,6 +9,7 @@
         body { background: #f8f9fa; height: 100vh; display: flex; align-items: center; }
         .login-card { border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
     </style>
+    <link rel="stylesheet" href="dashboard/layout/style.css">
 </head>
 <body>
 
