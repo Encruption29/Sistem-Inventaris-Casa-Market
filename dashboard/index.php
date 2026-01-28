@@ -44,13 +44,40 @@ $stmt = $pdo->prepare($query);
 $stmt->execute($params);
 $daftar_produk = $stmt->fetchAll();
 
-// PANGGIL HEADER (Pastikan header.php sudah berisi <html><head><body>)
+// --- LOGIKA CHART ---
+// Ambil 5 barang dengan stok terendah untuk grafik
+$stmt_chart = $pdo->query("SELECT nama_barang, stok FROM produk ORDER BY stok ASC LIMIT 5");
+$data_chart = $stmt_chart->fetchAll();
+
+$labels = [];
+$values = [];
+foreach ($data_chart as $row_chart) {
+    $labels[] = $row_chart->nama_barang;
+    $values[] = $row_chart->stok;
+}
+// --------------------
+
 include 'layout/header.php'; 
 ?>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link rel="stylesheet" href="layout/style.css">
 
 <div class="container mt-2 pb-5">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">📊 Analisis Stok Terendah</h5>
+                    <div style="height: 250px;">
+                        <canvas id="inventoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php if (isset($_GET['status'])): ?>
         <?php if ($_GET['status'] == 'gagal'): ?>
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -71,8 +98,8 @@ include 'layout/header.php';
     <?php endif; ?>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>📦 Daftar Inventaris Barang</h2>
-        <a href="tambah.php" class="btn btn-primary">+ Tambah Barang</a>
+        <h2 class="fw-bold">📦 Daftar Inventaris Barang</h2>
+        <a href="tambah.php" class="btn btn-primary shadow-sm">+ Tambah Barang</a>
     </div>
 
     <div class="card mb-4 shadow-sm border-0">
@@ -109,7 +136,8 @@ include 'layout/header.php';
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark">
                         <tr>
-                            <th class="ps-3">Nama Barang</th>
+                            <th class="ps-3">Foto</th>
+                            <th>Nama Barang</th>
                             <th>Kategori</th>
                             <th>Stok</th>
                             <th>Harga Jual</th>
@@ -121,10 +149,18 @@ include 'layout/header.php';
                         <?php if (count($daftar_produk) > 0): ?>
                             <?php foreach ($daftar_produk as $row): ?>
                             <tr>
-                                <td class="ps-3 fw-bold"><?= htmlspecialchars($row->nama_barang) ?></td>
+                                <td class="ps-3">
+                                    <?php if (!empty($row->foto)): ?>
+                                        <img src="data:image/jpeg;base64,<?= base64_encode($row->foto) ?>" 
+                                             class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <?php else: ?>
+                                        <img src="img/default.jpg" class="rounded shadow-sm" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <?php endif; ?>
+                                </td>
+                                <td class="fw-bold"><?= htmlspecialchars($row->nama_barang) ?></td>
                                 <td><span class="badge bg-info text-dark"><?= htmlspecialchars($row->nama_kategori) ?></span></td>
                                 <td>
-                                    <span class="badge <?= ($row->stok < 10) ? 'bg-danger' : 'bg-success' ?>">
+                                    <span class="badge <?= ($row->stok < 5) ? 'bg-danger' : 'bg-success' ?>">
                                         <?= $row->stok ?>
                                     </span>
                                 </td>
@@ -140,7 +176,7 @@ include 'layout/header.php';
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">Data tidak ditemukan.</td>
+                                <td colspan="7" class="text-center py-5 text-muted">Data tidak ditemukan.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -164,7 +200,47 @@ include 'layout/header.php';
     <?php endif; ?>
 </div>
 
+<script>
+const ctx = document.getElementById('inventoryChart').getContext('2d');
+
+// 1. Ambil data stok dari PHP
+const dataStok = <?= json_encode($values) ?>;
+
+// 2. Tentukan warna berdasarkan jumlah stok
+// Jika stok di bawah 5, warnanya Merah. Jika aman, warnanya Biru.
+const backgroundColors = dataStok.map(stok => stok < 5 ? 'rgba(255, 35, 83, 0.7)' : 'rgba(33, 155, 236, 0.7)');
+const borderColors = dataStok.map(stok => stok < 5 ? 'rgba(255, 49, 94, 1)' : 'rgba(47, 143, 207, 1)');
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: <?= json_encode($labels) ?>,
+        datasets: [{
+            label: 'Jumlah Stok',
+            data: dataStok,
+            backgroundColor: backgroundColors, // Menggunakan array warna dinamis
+            borderColor: borderColors,         // Menggunakan array warna dinamis
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false // Sembunyikan legend agar lebih bersih
+            }
+        },
+        scales: {
+            y: { 
+                beginAtZero: true,
+                ticks: { stepSize: 1 }
+            }
+        }
+    }
+});
+</script>
+
 <?php 
-// PANGGIL FOOTER (Pastikan footer.php berisi </body></html>)
 include 'layout/footer.php'; 
 ?>
